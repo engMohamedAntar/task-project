@@ -1,0 +1,381 @@
+<!--index.html-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project task</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 20px;
+    }
+  
+    h1, h2 {
+      text-align: center;
+      color: #333;
+    }
+  
+    form {
+      background-color: #fff;
+      padding: 20px;
+      margin: 20px auto;
+      width: 90%;
+      max-width: 500px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+  
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+      font-weight: bold;
+    }
+  
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+  
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: block;
+      margin: 10px auto;
+      font-size: 16px;
+    }
+  
+    button:hover {
+      background-color: #45a049;
+    }
+  
+    table {
+      width: 90%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background-color: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+  
+    th, td {
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+  
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+  
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+  
+    #adminsList, #studentsList, #coursesList {
+      margin-top: 20px;
+    }
+  </style>
+  
+</head>
+<body>
+
+  <h1>Create Admin</h1>
+
+  <form id="adminForm">
+    <label>Admin ID:</label><br>
+    <input type="number" name="adminId" required><br><br>
+
+    <label>Username:</label><br>
+    <input type="text" name="username" required><br><br>
+
+    <label>Password:</label><br>
+    <input type="password" name="password" required><br><br>
+
+    <label>Role:</label><br>
+    <input type="text" name="role" required><br><br>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <br><br>
+
+  <button id="getAdminsBtn">Get All Admins</button>
+
+  <div id="adminsList" style="margin-top: 20px;"></div>
+
+  <hr>
+  <h1>Create Student</h1>
+
+<form id="studentForm">
+  <label>Student ID:</label><br>
+  <input type="number" name="studentId" required><br><br>
+
+  <label>Name:</label><br>
+  <input type="text" name="name" required><br><br>
+
+  <label>Email:</label><br>
+  <input type="email" name="email" required><br><br>
+
+  <label>Phone:</label><br>
+  <input type="text" name="phone" required><br><br>
+
+  <label>Current Year:</label><br>
+  <input type="number" name="currentYear" required><br><br>
+
+  <button type="submit">Submit</button>
+</form>
+
+<br><br>
+
+<button id="getStudentsBtn">Get All Students</button>
+
+<div id="studentsList" style="margin-top: 20px;"></div>
+
+<hr>
+<h1>Create Course</h1>
+
+<form id="courseForm">
+  <label>Course ID:</label><br>
+  <input type="number" name="courseId" required><br><br>
+
+  <label>Course Name:</label><br>
+  <input type="text" name="courseName" required><br><br>
+
+  <label>Credits:</label><br>
+  <input type="number" name="credits" required><br><br>
+
+  <button type="submit">Submit</button>
+</form>
+
+<br><br>
+
+<button id="getCoursesBtn">Get All Courses</button>
+
+<div id="coursesList" style="margin-top: 20px;"></div>
+
+  <script>
+    const form = document.getElementById('adminForm');
+    const getAdminsBtn = document.getElementById('getAdminsBtn');
+    const adminsList = document.getElementById('adminsList');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      const response = await fetch('/admins', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+
+      const result = await response.json();
+      alert(result.message);
+
+      form.reset();
+    });
+
+    getAdminsBtn.addEventListener('click', async () => {
+      const response = await fetch('/admins');
+      const admins = await response.json();
+
+      if (admins.length === 0) {
+        adminsList.innerHTML = '<p>No admins found.</p>';
+        return;
+      }
+
+      let tableHTML = `
+        <h2>Admins:</h2>
+        <table border="1" cellpadding="10" cellspacing="0">
+          <thead>
+            <tr>
+              <th>Admin ID</th>
+              <th>Username</th>
+              <th>Role</th>
+              <th>Created At</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      admins.forEach(admin => {
+        tableHTML += `
+          <tr>
+            <td>${admin.adminId}</td>
+            <td>${admin.username}</td>
+            <td>${admin.role}</td>
+            <td>${new Date(admin.createdAt).toLocaleString()}</td>
+          </tr>
+        `;
+      });
+
+      tableHTML += `
+          </tbody>
+        </table>
+      `;
+
+      adminsList.innerHTML = tableHTML;
+    });
+
+    //user
+const studentForm = document.getElementById('studentForm');
+const getStudentsBtn = document.getElementById('getStudentsBtn');
+const studentsList = document.getElementById('studentsList');
+
+studentForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const formData = new FormData(studentForm);
+  const data = Object.fromEntries(formData.entries());
+
+  const response = await fetch('/students', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+
+  const result = await response.json();
+  alert(result.message);
+
+  studentForm.reset();
+});
+
+getStudentsBtn.addEventListener('click', async () => {
+  const response = await fetch('/students');
+  const students = await response.json();
+
+  if (students.length === 0) {
+    studentsList.innerHTML = '<p>No students found.</p>';
+    return;
+  }
+
+  let tableHTML = `
+    <h2>Students:</h2>
+    <table border="1" cellpadding="10" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Current Year</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  students.forEach(student => {
+    tableHTML += `
+      <tr>
+        <td>${student.studentId}</td>
+        <td>${student.name}</td>
+        <td>${student.email}</td>
+        <td>${student.phone}</td>
+        <td>${student.currentYear}</td>
+        <td>${new Date(student.createdAt).toLocaleString()}</td>
+      </tr>
+    `;
+  });
+
+  tableHTML += `
+      </tbody>
+    </table>
+  `;
+
+  studentsList.innerHTML = tableHTML;
+});
+
+//course
+const courseForm = document.getElementById('courseForm');
+const getCoursesBtn = document.getElementById('getCoursesBtn');
+const coursesList = document.getElementById('coursesList');
+
+courseForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const formData = new FormData(courseForm);
+  const data = Object.fromEntries(formData.entries());
+
+  const response = await fetch('/courses', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
+
+  const result = await response.json();
+  alert(result.message);
+
+  courseForm.reset();
+});
+
+getCoursesBtn.addEventListener('click', async () => {
+  const response = await fetch('/courses');
+  const courses = await response.json();
+
+  if (courses.length === 0) {
+    coursesList.innerHTML = '<p>No courses found.</p>';
+    return;
+  }
+
+  let tableHTML = `
+    <h2>Courses:</h2>
+    <table border="1" cellpadding="10" cellspacing="0">
+      <thead>
+        <tr>
+          <th>Course ID</th>
+          <th>Course Name</th>
+          <th>Credits</th>
+          <th>Created At</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  courses.forEach(course => {
+    tableHTML += `
+      <tr>
+        <td>${course.courseId}</td>
+        <td>${course.courseName}</td>
+        <td>${course.credits}</td>
+        <td>${new Date(course.createdAt).toLocaleString()}</td>
+      </tr>
+    `;
+  });
+
+  tableHTML += `
+      </tbody>
+    </table>
+  `;
+
+  coursesList.innerHTML = tableHTML;
+});
+
+  </script>
+
+
+  
+
+</body>
+
+
+</html>
